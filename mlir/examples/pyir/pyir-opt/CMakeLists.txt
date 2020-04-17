@@ -5,6 +5,18 @@ set(LIBS
         ${conversion_libs}
         MLIROptLib
         MLIRPyir
+
+        MLIRAnalysis
+        MLIRCallInterfaces
+        MLIRExecutionEngine
+        MLIRIR
+        MLIRLLVMIR
+        MLIRParser
+        MLIRPass
+        MLIRSideEffects
+        MLIRSupport
+        MLIRTargetLLVMIR
+        MLIRTransforms
         )
 add_llvm_executable(pyir-opt pyir-opt.cpp)
 

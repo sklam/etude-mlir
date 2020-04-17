@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#include "mlir/Parser.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/InitAllDialects.h"
@@ -18,8 +19,22 @@
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
+#include "mlir/Target/LLVMIR.h"
+#include "mlir/ExecutionEngine/ExecutionEngine.h"
+#include "mlir/ExecutionEngine/OptUtils.h"
+
+#include "llvm/ADT/StringRef.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/ErrorOr.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "Pyir/PyirDialect.h"
+
+int dumpLLVMIR(mlir::ModuleOp module);
 
 static llvm::cl::opt<std::string> inputFilename(llvm::cl::Positional,
                                                 llvm::cl::desc("<input file>"),
@@ -55,6 +70,13 @@ static llvm::cl::opt<bool>
     showDialects("show-dialects",
                  llvm::cl::desc("Print the list of registered dialects"),
                  llvm::cl::init(false));
+
+
+static llvm::cl::opt<bool>
+    emitLLVM("emit-llvm",
+                 llvm::cl::desc("Emit LLVM"),
+                 llvm::cl::init(false));
+
 
 int main(int argc, char **argv) {
   mlir::registerAllDialects();
@@ -96,6 +118,27 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+  if (emitLLVM) {
+    mlir::OwningModuleRef module;
+    mlir::PassManager pm(&context);
+    // Apply any generic pass manager command line options and run the pipeline.
+    applyPassManagerCLOptions(pm);
+
+    pm.addPass(mlir::createLowerToLLVMPass());
+
+
+    llvm::SourceMgr sourceMgr;
+
+    sourceMgr.AddNewSourceBuffer(std::move(file), llvm::SMLoc());
+    module = mlir::parseSourceFile(sourceMgr, &context);
+
+    if (mlir::failed(pm.run(*module)))
+      return 4;
+
+    dumpLLVMIR(*module);
+    return 0;
+  }
+
   if (failed(MlirOptMain(output->os(), std::move(file), passPipeline,
                          splitInputFile, verifyDiagnostics, verifyPasses,
                          allowUnregisteredDialects))) {
@@ -103,5 +146,32 @@ int main(int argc, char **argv) {
   }
   // Keep the output file if the invocation of MlirOptMain was successful.
   output->keep();
+  return 0;
+}
+
+int dumpLLVMIR(mlir::ModuleOp module) {
+  auto llvmModule = mlir::translateModuleToLLVMIR(module);
+  if (!llvmModule) {
+    llvm::errs() << "Failed to emit LLVM IR\n";
+    return -1;
+  }
+
+  // Initialize LLVM targets.
+  llvm::InitializeNativeTarget();
+  llvm::InitializeNativeTargetAsmPrinter();
+  mlir::ExecutionEngine::setupTargetTriple(llvmModule.get());
+
+  // temporary definition
+  int enableOpt = 1;
+
+  /// Optionally run an optimization pipeline over the llvm module.
+  auto optPipeline = mlir::makeOptimizingTransformer(
+      /*optLevel=*/enableOpt ? 3 : 0, /*sizeLevel=*/0,
+      /*targetMachine=*/nullptr);
+  if (auto err = optPipeline(llvmModule.get())) {
+    llvm::errs() << "Failed to optimize LLVM IR " << err << "\n";
+    return -1;
+  }
+  llvm::errs() << *llvmModule << "\n";
   return 0;
 }
