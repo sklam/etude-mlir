@@ -4,9 +4,9 @@ set(LIBS
         ${dialect_libs}
         ${conversion_libs}
         MLIROptLib
-        MLIRStandalone
+        MLIRPyir
         )
-add_llvm_executable(standalone-opt standalone-opt.cpp)
+add_llvm_executable(pyir-opt pyir-opt.cpp)
 
-llvm_update_compile_flags(standalone-opt)
-target_link_libraries(standalone-opt PRIVATE ${LIBS})
+llvm_update_compile_flags(pyir-opt)
+target_link_libraries(pyir-opt PRIVATE ${LIBS})

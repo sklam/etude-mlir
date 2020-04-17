@@ -1,4 +1,4 @@
-//===- StandaloneDialect.td - Standalone dialect -----------*- tablegen -*-===//
+//===- PyirDialect.td - Pyir dialect -----------*- tablegen -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,31 +6,31 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef STANDALONE_DIALECT
-#define STANDALONE_DIALECT
+#ifndef PYIR_DIALECT
+#define PYIR_DIALECT
 
 include "mlir/IR/OpBase.td"
 
 //===----------------------------------------------------------------------===//
-// Standalone dialect definition.
+// Pyir dialect definition.
 //===----------------------------------------------------------------------===//
 
-def Standalone_Dialect : Dialect {
-    let name = "standalone";
-    let summary = "A standalone out-of-tree MLIR dialect.";
+def Pyir_Dialect : Dialect {
+    let name = "pyir";
+    let summary = "A pyir out-of-tree MLIR dialect.";
     let description = [{
         This dialect is an example of an out-of-tree MLIR dialect designed to
         illustrate the basic setup required to develop MLIR-based tools without
         working inside of the LLVM source tree.
     }];
-    let cppNamespace = "standalone";
+    let cppNamespace = "pyir";
 }
 
 //===----------------------------------------------------------------------===//
-// Base standalone operation definition.
+// Base pyir operation definition.
 //===----------------------------------------------------------------------===//
 
-class Standalone_Op<string mnemonic, list<OpTrait> traits = []> :
-        Op<Standalone_Dialect, mnemonic, traits>;
+class Pyir_Op<string mnemonic, list<OpTrait> traits = []> :
+        Op<Pyir_Dialect, mnemonic, traits>;
 
-#endif // STANDALONE_DIALECT
+#endif // PYIR_DIALECT

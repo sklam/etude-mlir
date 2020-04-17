@@ -17,7 +17,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(standalone-dialect LANGUAGES CXX C)
+project(pyir-dialect LANGUAGES CXX C)
 
 find_package(MLIR REQUIRED CONFIG)
 
@@ -45,4 +45,4 @@ add_definitions(${LLVM_DEFINITIONS})
 add_subdirectory(include)
 add_subdirectory(lib)
 add_subdirectory(test)
-add_subdirectory(standalone-opt)
+add_subdirectory(pyir-opt)

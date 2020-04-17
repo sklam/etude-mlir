@@ -1,4 +1,4 @@
-//===- StandaloneOps.cpp - Standalone dialect ops ---------------*- C++ -*-===//
+//===- PyirOps.cpp - Pyir dialect ops ---------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,13 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Standalone/StandaloneOps.h"
-#include "Standalone/StandaloneDialect.h"
+#include "Pyir/PyirOps.h"
+#include "Pyir/PyirDialect.h"
 #include "mlir/IR/OpImplementation.h"
 
 namespace mlir {
-namespace standalone {
+namespace pyir {
 #define GET_OP_CLASSES
-#include "Standalone/StandaloneOps.cpp.inc"
-} // namespace standalone
+#include "Pyir/PyirOps.cpp.inc"
+} // namespace pyir
 } // namespace mlir
